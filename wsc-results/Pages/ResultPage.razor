@@ -2,7 +2,7 @@
 <div class="main-area">
     @if (_resultRoot?.Results is not null)
     {
-        <Chart Config="_config"></Chart>
+        <Chart Config="_config" @ref="_chart"></Chart>
     }
     else
     {
@@ -15,12 +15,13 @@
 
 @code {
     private Root _resultRoot = new Root();
-    private BarConfig _config;
+    private BarConfig _config = null!;
+    private Chart _chart = null!;
 
     protected override async Task OnInitializedAsync()
     {
         _resultRoot = await _http.GetFromJsonAsync<Root>("?offset=0&limit=30000&sort=event_desc&l=en-US") ?? new Root();
-        _config = new BarConfig(true)
+        _config = new BarConfig()
             {
                 Options = new BarOptions
                 {
@@ -28,7 +29,7 @@
                     Title = new OptionsTitle
                     {
                         Display = true,
-                        Text = "Chart.js Bar Chart - Stacked and Horizontal"
+                        Text = "Chart.js Bar Chart - Stacked"
                     },
                     Tooltips = new Tooltips
                     {
@@ -54,6 +55,30 @@
                     }
                 }
             };
-        //_config.Data.Datasets.Add(dataset);
+        //IDataset<int> dataset1 = new BarDataset<int>(new int[] { 1, 2, 3, 4, 5 })
+        //    {
+        //        Label = "Dataset 1",
+        //        BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Red)
+        //    };
+
+        //IDataset<int> dataset2 = new BarDataset<int>(new int[] { 1, 2, 3, 4, 5 })
+        //    {
+        //        Label = "Dataset 2",
+        //        BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Blue)
+        //    };
+
+        //IDataset<int> dataset3 = new BarDataset<int>(new int[] { 1, 2, 3, 4, 5 })
+        //    {
+        //        Label = "Dataset 3",
+        //        BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Green)
+        //    };
+        //_config.Data.Labels.Add("data 1");
+        //_config.Data.Labels.Add("data 2");
+        //_config.Data.Labels.Add("data 3");
+        //_config.Data.Labels.Add("data 4");
+        //_config.Data.Labels.Add("data 5");
+        //_config.Data.Datasets.Add(dataset1);
+        //_config.Data.Datasets.Add(dataset2);
+        //_config.Data.Datasets.Add(dataset3);
     }
 }
