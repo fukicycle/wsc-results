@@ -20,7 +20,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _resultRoot = await _http.GetFromJsonAsync<Root>("?offset=0&limit=30000&sort=event_desc&l=en-US") ?? new Root();
+        _resultRoot = await _http.GetFromJsonAsync<Root>("?offset=0&limit=10000&sort=event_desc&member=14") ?? new Root();
 
         _config = new BarConfig()
             {
@@ -61,7 +61,7 @@
         List<int> bronze = new List<int>();
         List<int> mfe = new List<int>();
         List<int> other = new List<int>();
-        _resultRoot.Results.Where(a => a.Member.Code == "JP").GroupBy(a => a.Skill.Event.Name).Select(a => new
+        _resultRoot.Results.GroupBy(a => a.Skill.Event.Name).Select(a => new
         {
             Event = a.Key,
             Medals = a
@@ -72,7 +72,7 @@
             silver.Add(@event.Medals.Count(a => a.Medal?.Code == "SILVER"));
             bronze.Add(@event.Medals.Count(a => a.Medal?.Code == "BRONZE"));
             mfe.Add(@event.Medals.Count(a => a.Medal?.Code == "MFE"));
-            other.Add(@event.Medals.Count(a => a.Medal is null));
+            other.Add(@event.Medals.Count(a => a.Medal is null || a.Medal.Code == null));
         });
         IDataset<int> goldData = new BarDataset<int>(gold)
             {
@@ -106,30 +106,5 @@
         _config.Data.Datasets.Add(bronzeData);
         _config.Data.Datasets.Add(mfeData);
         _config.Data.Datasets.Add(otherData);
-        //IDataset<int> dataset1 = new BarDataset<int>(new int[] { 1, 2, 3, 4, 5 })
-        //    {
-        //        Label = "Dataset 1",
-        //        BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Red)
-        //    };
-
-        //IDataset<int> dataset2 = new BarDataset<int>(new int[] { 1, 2, 3, 4, 5 })
-        //    {
-        //        Label = "Dataset 2",
-        //        BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Blue)
-        //    };
-
-        //IDataset<int> dataset3 = new BarDataset<int>(new int[] { 1, 2, 3, 4, 5 })
-        //    {
-        //        Label = "Dataset 3",
-        //        BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Green)
-        //    };
-        //_config.Data.Labels.Add("data 1");
-        //_config.Data.Labels.Add("data 2");
-        //_config.Data.Labels.Add("data 3");
-        //_config.Data.Labels.Add("data 4");
-        //_config.Data.Labels.Add("data 5");
-        //_config.Data.Datasets.Add(dataset1);
-        //_config.Data.Datasets.Add(dataset2);
-        //_config.Data.Datasets.Add(dataset3);
     }
 }
