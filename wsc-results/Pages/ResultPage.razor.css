@@ -2,3 +2,10 @@
     width: 100px;
     object-fit: contain;
 }
+
+.main-area {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
