@@ -15,7 +15,7 @@ namespace wsc_results.Models
 
         [JsonProperty("person_id", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("person_id")]
-        public int PersonId { get; set; }
+        public int? PersonId { get; set; }
 
         [JsonProperty("image", NullValueHandling = NullValueHandling.Ignore)]
         [JsonPropertyName("image")]
