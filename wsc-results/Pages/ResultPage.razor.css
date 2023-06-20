@@ -11,11 +11,10 @@
 }
 
 .chart-area {
-    display: flex;
-    flex-wrap: wrap;
     flex-grow: 1;
     height: 100%;
     width: 100%;
+    overflow-y: auto;
 }
 
 .chart-filter-area {
@@ -25,7 +24,9 @@
 }
 
 .chart-content {
-    width: 50%;
+    max-width: 1700px;
+    margin: auto;
+    width: 100%;
     padding: .5rem;
 }
 
