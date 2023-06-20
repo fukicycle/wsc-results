@@ -1,29 +1,37 @@
 ﻿using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using wsc_results.Models;
 
 namespace wsc_results.Models
 {
     public class Skill
     {
-        [JsonProperty("id")]
-        public int? Id { get; set; }
+        [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
 
-        [JsonProperty("event")]
-        public Event Event { get; set; }
+        [JsonProperty("event", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("event")]
+        public Event Event { get; set; } = null!;
 
-        [JsonProperty("type")]
-        public string Type { get; set; }
+        [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("type")]
+        public string Type { get; set; } = null!;
 
-        [JsonProperty("base_id")]
-        public int? BaseId { get; set; }
+        [JsonProperty("base_id", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("base_id")]
+        public int BaseId { get; set; }
 
-        [JsonProperty("number")]
-        public string Number { get; set; }
+        [JsonProperty("number", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("number")]
+        public string Number { get; set; } = null!;
 
-        [JsonProperty("name")]
-        public Name Name { get; set; }
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("name")]
+        public Name Name { get; set; } = null!;
 
-        [JsonProperty("links")]
-        public List<object> Links { get; set; }
+        [JsonProperty("links", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("links")]
+        public List<object> Links { get; set; } = null!;
     }
 }

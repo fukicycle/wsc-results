@@ -1,28 +1,36 @@
 ﻿using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace wsc_results.Models
 {
     public class Event
     {
-        [JsonProperty("id")]
-        public int? Id { get; set; }
+        [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
 
-        [JsonProperty("name")]
-        public string Name { get; set; }
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = null!;
 
-        [JsonProperty("start_date")]
-        public string StartDate { get; set; }
+        [JsonProperty("start_date", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("start_date")]
+        public string StartDate { get; set; } = null!;
 
-        [JsonProperty("end_date")]
-        public string EndDate { get; set; }
+        [JsonProperty("end_date", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("end_date")]
+        public string EndDate { get; set; } = null!;
 
-        [JsonProperty("code")]
-        public string Code { get; set; }
+        [JsonProperty("code", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("code")]
+        public string Code { get; set; } = null!;
 
-        [JsonProperty("ws_entity")]
-        public WsEntity WsEntity { get; set; }
+        [JsonProperty("ws_entity", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("ws_entity")]
+        public WsEntity WsEntity { get; set; } = null!;
 
-        [JsonProperty("links")]
-        public List<object> Links { get; set; }
+        [JsonProperty("links", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonPropertyName("links")]
+        public List<object> Links { get; set; } = null!;
     }
 }
