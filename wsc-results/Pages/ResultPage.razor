@@ -89,7 +89,7 @@
         _eventRoot = await _http.GetFromJsonAsync<EventRoot>("events") ?? new EventRoot();
         _skillRoot = await _http.GetFromJsonAsync<SkillRoot>("base_skills?entity=1&l=en") ?? new SkillRoot();
         _memberRoot = await _http.GetFromJsonAsync<MemberRoot>("members?l=en") ?? new MemberRoot();
-        _barConfig1 = new BarConfig()
+        _barConfig1 = new BarConfig(true)
             {
                 Options = new BarOptions
                 {
@@ -101,14 +101,14 @@
                     },
                     Scales = new BarScales
                     {
-                        XAxes = new List<CartesianAxis>
+                        YAxes = new List<CartesianAxis>
                     {
                         new BarCategoryAxis
                         {
                             Stacked = true
                         }
                     },
-                        YAxes = new List<CartesianAxis>
+                        XAxes = new List<CartesianAxis>
                     {
                         new BarLinearCartesianAxis
                         {
@@ -118,10 +118,11 @@
                     }
                 }
             };
-        _barConfig2 = new BarConfig()
+        _barConfig2 = new BarConfig(true)
             {
                 Options = new BarOptions
                 {
+                    AspectRatio = 1,
                     Responsive = true,
                     Tooltips = new Tooltips
                     {
@@ -130,20 +131,25 @@
                     },
                     Scales = new BarScales
                     {
-                        XAxes = new List<CartesianAxis>
-                    {
-                        new BarCategoryAxis
-                        {
-                            Stacked = true
-                        }
-                    },
                         YAxes = new List<CartesianAxis>
-                    {
-                        new BarLinearCartesianAxis
                         {
-                            Stacked = true
+                            new BarCategoryAxis
+                            {
+                                Stacked = true,
+                                Ticks = new ChartJs.Blazor.Common.Axes.Ticks.CategoryTicks
+                                {
+                                    Display = true,
+                                    AutoSkip = false,
+                                }
+                            }
+                        },
+                        XAxes = new List<CartesianAxis>
+                        {
+                            new BarLinearCartesianAxis
+                            {
+                                Stacked = true
+                            }
                         }
-                    }
                     }
                 }
             };
@@ -199,29 +205,29 @@
             mfe.Add(@event.Medals.Count(a => a.Medal?.Code == "MFE"));
             other.Add(@event.Medals.Count(a => a.Medal is null || a.Medal.Code == null));
         });
-        IDataset<int> goldData = new BarDataset<int>(gold)
+        IDataset<int> goldData = new BarDataset<int>(gold, true)
             {
                 Label = "Gold",
                 BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gold)
             };
 
-        IDataset<int> silverData = new BarDataset<int>(silver)
+        IDataset<int> silverData = new BarDataset<int>(silver, true)
             {
                 Label = "Silver",
                 BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Silver)
             };
 
-        IDataset<int> bronzeData = new BarDataset<int>(bronze)
+        IDataset<int> bronzeData = new BarDataset<int>(bronze, true)
             {
                 Label = "Bronze",
                 BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Brown)
             };
-        IDataset<int> mfeData = new BarDataset<int>(mfe)
+        IDataset<int> mfeData = new BarDataset<int>(mfe, true)
             {
                 Label = "Medallion for Excellence",
                 BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Chocolate)
             };
-        IDataset<int> otherData = new BarDataset<int>(other)
+        IDataset<int> otherData = new BarDataset<int>(other, true)
             {
                 Label = "Other",
                 BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gray)
@@ -255,29 +261,29 @@
             mfe.Add(skill.Medals.Count(a => a.Medal?.Code == "MFE"));
             other.Add(skill.Medals.Count(a => a.Medal is null || a.Medal.Code == null));
         });
-        IDataset<int> goldData = new BarDataset<int>(gold)
+        IDataset<int> goldData = new BarDataset<int>(gold, true)
             {
                 Label = "Gold",
                 BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gold)
             };
 
-        IDataset<int> silverData = new BarDataset<int>(silver)
+        IDataset<int> silverData = new BarDataset<int>(silver, true)
             {
                 Label = "Silver",
                 BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Silver)
             };
 
-        IDataset<int> bronzeData = new BarDataset<int>(bronze)
+        IDataset<int> bronzeData = new BarDataset<int>(bronze, true)
             {
                 Label = "Bronze",
                 BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Brown)
             };
-        IDataset<int> mfeData = new BarDataset<int>(mfe)
+        IDataset<int> mfeData = new BarDataset<int>(mfe, true)
             {
                 Label = "Medallion for Excellence",
                 BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Chocolate)
             };
-        IDataset<int> otherData = new BarDataset<int>(other)
+        IDataset<int> otherData = new BarDataset<int>(other, true)
             {
                 Label = "Other",
                 BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gray)
