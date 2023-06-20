@@ -1,0 +1,35 @@
+﻿@inject HttpClient _http
+<div>
+    @if (_resultRoot.Results is not null)
+    {
+        @foreach (var item in _resultRoot.Results)
+        {
+            <div class="card p-3 m-1">
+                <div>Event: @item.Skill?.Event?.Name</div>
+                <div>Skill: @item.Skill?.Name?.Text</div>
+                <div>Medal: @item.Medal?.Name?.Text</div>
+                <div>Country: @item.Member?.Name?.Text</div>
+                <div>Members:</div>
+                <div>
+                    @foreach (var competitor in item.Competitors)
+                    {
+                        <div>
+                            <img src="@competitor?.Image?.Thumbnail" />
+                            <div>@competitor?.FirstName @competitor?.LastName</div>
+                        </div>
+
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private Root _resultRoot = new Root();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _resultRoot = await _http.GetFromJsonAsync<Root>("?offset=120&limit=10&sort=event_desc&l=en-US") ?? new Root();
+    }
+}
