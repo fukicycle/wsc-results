@@ -1,37 +1,95 @@
 ﻿@inject HttpClient _http
 <div class="main-area">
+    <div class="chart-filter-area">
+        <div class="filter-item">
+            <div>Competition:</div>
+            <select @bind="_eventId">
+                <option value="0">-</option>
+                @if (_eventRoot.Events is not null)
+                {
+                    @foreach (var item in _eventRoot.Events)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="filter-item">
+            <div>Member:</div>
+            <select @bind="_memberId">
+                @if (_memberRoot.Members is not null)
+                {
+                    @foreach (var item in _memberRoot.Members)
+                    {
+                        <option value="@item.Id">@item.Name.Text</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="filter-item">
+            <div>Skill:</div>
+            <select @bind="_skillId">
+                <option value="0">-</option>
+                @if (_skillRoot.BaseSkills is not null)
+                {
+                    @foreach (var item in _skillRoot.BaseSkills)
+                    {
+                        <option value="@item.Id">@item.Name.Text</option>
+                    }
+                }
+            </select>
+        </div>
+        <button class="filter-item btn btn-primary" @onclick="SearchButtonOnClick">Search</button>
+    </div>
     @if (_resultRoot?.Results is not null)
     {
-        <Chart Config="_config" @ref="_chart"></Chart>
+        <div class="chart-area">
+            <div class="chart-content">
+                <div>Chart of Japan</div>
+                <div class="chart">
+                    <Chart Config="_config" @ref="_chart"></Chart>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div>Chart 2</div>
+            </div>
+        </div>
     }
     else
     {
-        <div class="text-center">
-            <div class="loading spinner-border"></div>
-            <div>Getting data...</div>
+        <div class="loading">
+            <div class="text-center">
+                <div class="spinner-border"></div>
+                <div>Getting data...</div>
+            </div>
         </div>
     }
 </div>
 
 @code {
     private Root _resultRoot = new Root();
+    private EventRoot _eventRoot = new EventRoot();
+    private SkillRoot _skillRoot = new SkillRoot();
+    private MemberRoot _memberRoot = new MemberRoot();
     private BarConfig _config = null!;
     private Chart _chart = null!;
+    private readonly int MAX_LIMIT = int.MaxValue;
+
+    private int _eventId = 0;
+    private int _memberId = 14;
+    private int _skillId = 0;
 
     protected override async Task OnInitializedAsync()
     {
-        _resultRoot = await _http.GetFromJsonAsync<Root>("?offset=0&limit=10000&sort=event_desc&member=14") ?? new Root();
-
+        _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member=14") ?? new Root();
+        _eventRoot = await _http.GetFromJsonAsync<EventRoot>("events") ?? new EventRoot();
+        _skillRoot = await _http.GetFromJsonAsync<SkillRoot>("base_skills?entity=1&l=en") ?? new SkillRoot();
+        _memberRoot = await _http.GetFromJsonAsync<MemberRoot>("members?l=en") ?? new MemberRoot();
         _config = new BarConfig()
             {
                 Options = new BarOptions
                 {
                     Responsive = true,
-                    Title = new OptionsTitle
-                    {
-                        Display = true,
-                        Text = "World skills results of Japan"
-                    },
                     Tooltips = new Tooltips
                     {
                         Mode = InteractionMode.Index,
@@ -56,12 +114,39 @@
                     }
                 }
             };
+        Refresh();
+    }
+
+
+    private async Task SearchButtonOnClick()
+    {
+        if (_memberId != 0 && _eventId != 0 && _skillId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}&event={_eventId}&skill_base_id={_skillId}") ?? new Root();
+        else if (_memberId != 0 && _eventId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}&event={_eventId}") ?? new Root();
+        else if (_memberId != 0 && _skillId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}&skill_base_id={_skillId}") ?? new Root();
+        else if (_eventId != 0 && _skillId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&event={_eventId}&skill_base_id={_skillId}") ?? new Root();
+        else if (_memberId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}") ?? new Root();
+        else if (_eventId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&event={_eventId}") ?? new Root();
+        else if (_skillId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&skill_base_id={_skillId}") ?? new Root();
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        _config.Data.Datasets.Clear();
+        _config.Data.Labels.Clear();
         List<int> gold = new List<int>();
         List<int> silver = new List<int>();
         List<int> bronze = new List<int>();
         List<int> mfe = new List<int>();
         List<int> other = new List<int>();
-        _resultRoot.Results.GroupBy(a => a.Skill.Event.Name).Select(a => new
+        _resultRoot.Results.GroupBy(a => a.Skill.Event.Code).Select(a => new
         {
             Event = a.Key,
             Medals = a
