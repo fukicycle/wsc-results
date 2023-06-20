@@ -2,7 +2,7 @@
 <div class="main-area">
     @if (_resultRoot?.Results is not null)
     {
-
+        <Chart Config="_config"></Chart>
     }
     else
     {
@@ -15,9 +15,45 @@
 
 @code {
     private Root _resultRoot = new Root();
+    private BarConfig _config;
 
     protected override async Task OnInitializedAsync()
     {
         _resultRoot = await _http.GetFromJsonAsync<Root>("?offset=0&limit=30000&sort=event_desc&l=en-US") ?? new Root();
+        _config = new BarConfig(true)
+            {
+                Options = new BarOptions
+                {
+                    Responsive = true,
+                    Title = new OptionsTitle
+                    {
+                        Display = true,
+                        Text = "Chart.js Bar Chart - Stacked and Horizontal"
+                    },
+                    Tooltips = new Tooltips
+                    {
+                        Mode = InteractionMode.Index,
+                        Intersect = false
+                    },
+                    Scales = new BarScales
+                    {
+                        XAxes = new List<CartesianAxis>
+                    {
+                        new BarCategoryAxis
+                        {
+                            Stacked = true
+                        }
+                    },
+                        YAxes = new List<CartesianAxis>
+                    {
+                        new BarLinearCartesianAxis
+                        {
+                            Stacked = true
+                        }
+                    }
+                    }
+                }
+            };
+        //_config.Data.Datasets.Add(dataset);
     }
 }
