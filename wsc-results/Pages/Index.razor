@@ -1,6 +1,22 @@
 ﻿@page "/"
 <PageTitle>WSC - Results</PageTitle>
-<Header></Header>
+<Header MenuButtonOnClick="HeaderMenuButtonOnClick"></Header>
 <div class="display-area">
-    <ResultPage></ResultPage>
+    @switch (_pageIndex)
+    {
+        case 0:
+            <ResultByCountryPage></ResultByCountryPage>
+            break;
+        case 1:
+            <ResultBySkillPage></ResultBySkillPage>
+            break;
+    }
 </div>
+
+@code {
+    private int _pageIndex = 0;
+    private void HeaderMenuButtonOnClick(int pageIndex)
+    {
+        _pageIndex = pageIndex;
+    }
+}

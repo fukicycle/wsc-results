@@ -1,6 +1,16 @@
 ﻿<div class="header">
-    <div class="title">World Skills Results</div>
+    <div class="header-content">
+        <div class="title">World Skills Results</div>
+        <button class="btn-menu" @onclick="(() => ButtonOnClick(0))">Country</button>
+        <button class="btn-menu" @onclick="(() => ButtonOnClick(1))">Skill</button>
+    </div>
 </div>
 @code {
+    [Parameter]
+    public EventCallback<int> MenuButtonOnClick { get; set; }
 
+    public async Task ButtonOnClick(int pageIndex)
+    {
+        await MenuButtonOnClick.InvokeAsync(pageIndex);
+    }
 }

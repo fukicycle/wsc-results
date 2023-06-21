@@ -9,3 +9,22 @@
     background-color: #3B9BB0;
     color: #C9E7ED;
 }
+
+.header-content {
+    max-width: 1300px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.title {
+    margin: 5px auto 5px 5px;
+}
+
+.btn-menu {
+    background-color: #3B9BB0;
+    color: #C9E7ED;
+    outline: none;
+    border: none;
+    margin-right: 5px;
+}
