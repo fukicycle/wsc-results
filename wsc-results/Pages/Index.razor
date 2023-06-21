@@ -115,8 +115,12 @@
             _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}") ?? new Root();
     }
 
-    private void HeaderMenuButtonOnClick(int pageIndex)
+    private async Task HeaderMenuButtonOnClick(int pageIndex)
     {
+        _resultRoot = null;
+        _skillId = 483;
+        _memberId = 14;
         _pageIndex = pageIndex;
+        await SearchButtonOnClick();
     }
 }

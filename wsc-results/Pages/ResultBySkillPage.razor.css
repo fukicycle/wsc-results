@@ -1,0 +1,47 @@
+﻿img {
+    width: 100px;
+    object-fit: contain;
+}
+
+.main-area {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chart-area {
+    flex-grow: 1;
+    margin: auto;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: .5rem;
+}
+
+.chart-content {
+    width: 49.9%;
+    min-width: 350px;
+}
+
+.chart {
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+.loading {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media screen and (max-width: 1366px) {
+    .chart-content {
+        width: 100%;
+    }
+}
