@@ -1,45 +1,47 @@
 ﻿@inject HttpClient _http
 <div class="main-area">
-    <div class="chart-filter-area">
-        <div class="filter-item">
-            <div>Competition:</div>
-            <select @bind="_eventId">
-                <option value="0">-</option>
-                @if (_eventRoot.Events is not null)
-                {
-                    @foreach (var item in _eventRoot.Events)
+    <div class="chart-filter">
+        <div class="chart-filter-area">
+            <div class="filter-item">
+                <div>Competition:</div>
+                <select @bind="_eventId">
+                    <option value="0">-</option>
+                    @if (_eventRoot.Events is not null)
                     {
-                        <option value="@item.Id">@item.Name</option>
+                        @foreach (var item in _eventRoot.Events)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
                     }
-                }
-            </select>
-        </div>
-        <div class="filter-item">
-            <div>Member:</div>
-            <select @bind="_memberId">
-                @if (_memberRoot.Members is not null)
-                {
-                    @foreach (var item in _memberRoot.Members)
+                </select>
+            </div>
+            <div class="filter-item">
+                <div>Member:</div>
+                <select @bind="_memberId">
+                    @if (_memberRoot.Members is not null)
                     {
-                        <option value="@item.Id">@item.Name.Text</option>
+                        @foreach (var item in _memberRoot.Members)
+                        {
+                            <option value="@item.Id">@item.Name.Text</option>
+                        }
                     }
-                }
-            </select>
-        </div>
-        <div class="filter-item">
-            <div>Skill:</div>
-            <select @bind="_skillId">
-                <option value="0">-</option>
-                @if (_skillRoot.BaseSkills is not null)
-                {
-                    @foreach (var item in _skillRoot.BaseSkills)
+                </select>
+            </div>
+            <div class="filter-item">
+                <div>Skill:</div>
+                <select @bind="_skillId">
+                    <option value="0">-</option>
+                    @if (_skillRoot.BaseSkills is not null)
                     {
-                        <option value="@item.Id">@item.Name.Text</option>
+                        @foreach (var item in _skillRoot.BaseSkills)
+                        {
+                            <option value="@item.Id">@item.Name.Text</option>
+                        }
                     }
-                }
-            </select>
+                </select>
+            </div>
         </div>
-        <button class="filter-item btn btn-primary" @onclick="SearchButtonOnClick">Search</button>
+        <button class="btn btn-primary w-100" @onclick="SearchButtonOnClick">Search</button>
     </div>
     @if (_resultRoot?.Results is not null)
     {
@@ -93,6 +95,7 @@
             {
                 Options = new BarOptions
                 {
+                    AspectRatio = 1,
                     Responsive = true,
                     Tooltips = new Tooltips
                     {
@@ -122,7 +125,7 @@
             {
                 Options = new BarOptions
                 {
-                    AspectRatio = 1,
+                    AspectRatio = 0.5,
                     Responsive = true,
                     Tooltips = new Tooltips
                     {
