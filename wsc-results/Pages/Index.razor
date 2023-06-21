@@ -1,20 +1,104 @@
 ﻿@page "/"
+@inject HttpClient _http
 <PageTitle>WSC - Results</PageTitle>
 <Header MenuButtonOnClick="HeaderMenuButtonOnClick"></Header>
 <div class="display-area">
-    @switch (_pageIndex)
-    {
-        case 0:
-            <ResultByCountryPage></ResultByCountryPage>
-            break;
-        case 1:
-            <ResultBySkillPage></ResultBySkillPage>
-            break;
-    }
+    <div class="chart-filter">
+        <div class="chart-filter-area">
+            <div class="filter-item">
+                <div>Competition:</div>
+                <select @bind="_eventId">
+                    <option value="0">-</option>
+                    @if (_eventRoot.Events is not null)
+                    {
+                        @foreach (var item in _eventRoot.Events)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="filter-item">
+                <div>Member:</div>
+                <select @bind="_memberId">
+                    @if (_memberRoot.Members is not null)
+                    {
+                        @foreach (var item in _memberRoot.Members)
+                        {
+                            <option value="@item.Id">@item.Name.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="filter-item">
+                <div>Skill:</div>
+                <select @bind="_skillId">
+                    <option value="0">-</option>
+                    @if (_skillRoot.BaseSkills is not null)
+                    {
+                        @foreach (var item in _skillRoot.BaseSkills)
+                        {
+                            <option value="@item.Id">@item.Name.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+        <button class="btn btn-primary w-100" @onclick="SearchButtonOnClick">Search</button>
+    </div>
+    <div class="content-area">
+        @switch (_pageIndex)
+        {
+            case 0:
+                <ResultByCountryPage ResultRoot="@_resultRoot"></ResultByCountryPage>
+                break;
+            case 1:
+                <ResultBySkillPage></ResultBySkillPage>
+                break;
+        }
+    </div>
 </div>
 
 @code {
+    private readonly int MAX_LIMIT = int.MaxValue;
+
+    private Root? _resultRoot = null;
+    private EventRoot _eventRoot = new EventRoot();
+    private SkillRoot _skillRoot = new SkillRoot();
+    private MemberRoot _memberRoot = new MemberRoot();
+
+    private int _eventId = 0;
+    private int _memberId = 14;
+    private int _skillId = 0;
+
     private int _pageIndex = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member=14") ?? new Root();
+        _eventRoot = await _http.GetFromJsonAsync<EventRoot>("events") ?? new EventRoot();
+        _skillRoot = await _http.GetFromJsonAsync<SkillRoot>("base_skills?entity=1&l=en") ?? new SkillRoot();
+        _memberRoot = await _http.GetFromJsonAsync<MemberRoot>("members?l=en") ?? new MemberRoot();
+    }
+
+    private async Task SearchButtonOnClick()
+    {
+        if (_memberId != 0 && _eventId != 0 && _skillId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}&event={_eventId}&skill_base_id={_skillId}") ?? new Root();
+        else if (_memberId != 0 && _eventId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}&event={_eventId}") ?? new Root();
+        else if (_memberId != 0 && _skillId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}&skill_base_id={_skillId}") ?? new Root();
+        else if (_eventId != 0 && _skillId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&event={_eventId}&skill_base_id={_skillId}") ?? new Root();
+        else if (_memberId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}") ?? new Root();
+        else if (_eventId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&event={_eventId}") ?? new Root();
+        else if (_skillId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&skill_base_id={_skillId}") ?? new Root();
+    }
+
     private void HeaderMenuButtonOnClick(int pageIndex)
     {
         _pageIndex = pageIndex;

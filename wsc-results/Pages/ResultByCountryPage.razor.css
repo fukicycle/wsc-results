@@ -4,10 +4,10 @@
 }
 
 .main-area {
-    flex-flow: column;
-    display: flex;
     height: 100%;
+    display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 .chart-area {
@@ -22,13 +22,6 @@
     padding-top: .5rem;
 }
 
-.chart-filter-area {
-    display: flex;
-    flex-flow: column;
-    justify-content: center;
-    align-items: center;
-}
-
 .chart-content {
     width: 49.9%;
     min-width: 350px;
@@ -39,36 +32,6 @@
     width: 100%;
     position: relative;
 }
-
-.chart-filter {
-    margin: auto;
-    max-width: 600px;
-    width: 100%;
-}
-
-.filter-item {
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-    width: 100%;
-}
-
-    .filter-item > div, select {
-        padding: .5rem 0;
-        margin: 5px 0;
-        border: none;
-        outline: none;
-    }
-
-    .filter-item > select {
-        border-bottom: solid 1px black;
-        width: 100%;
-    }
-
-    .filter-item > div {
-        width: 100px;
-        min-width: 100px;
-    }
 
 .loading {
     flex-grow: 1;

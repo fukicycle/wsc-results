@@ -1,49 +1,6 @@
 ﻿@inject HttpClient _http
 <div class="main-area">
-    <div class="chart-filter">
-        <div class="chart-filter-area">
-            <div class="filter-item">
-                <div>Competition:</div>
-                <select @bind="_eventId">
-                    <option value="0">-</option>
-                    @if (_eventRoot.Events is not null)
-                    {
-                        @foreach (var item in _eventRoot.Events)
-                        {
-                            <option value="@item.Id">@item.Name</option>
-                        }
-                    }
-                </select>
-            </div>
-            <div class="filter-item">
-                <div>Member:</div>
-                <select @bind="_memberId">
-                    @if (_memberRoot.Members is not null)
-                    {
-                        @foreach (var item in _memberRoot.Members)
-                        {
-                            <option value="@item.Id">@item.Name.Text</option>
-                        }
-                    }
-                </select>
-            </div>
-            <div class="filter-item">
-                <div>Skill:</div>
-                <select @bind="_skillId">
-                    <option value="0">-</option>
-                    @if (_skillRoot.BaseSkills is not null)
-                    {
-                        @foreach (var item in _skillRoot.BaseSkills)
-                        {
-                            <option value="@item.Id">@item.Name.Text</option>
-                        }
-                    }
-                </select>
-            </div>
-        </div>
-        <button class="btn btn-primary w-100" @onclick="SearchButtonOnClick">Search</button>
-    </div>
-    @if (_resultRoot?.Results is not null)
+    @if (ResultRoot is not null)
     {
         <div class="chart-area">
             <div class="chart-content">
@@ -72,25 +29,28 @@
 </div>
 
 @code {
-    private Root _resultRoot = new Root();
-    private EventRoot _eventRoot = new EventRoot();
-    private SkillRoot _skillRoot = new SkillRoot();
-    private MemberRoot _memberRoot = new MemberRoot();
+    private Root? _resultRoot;
+    [Parameter]
+    public Root? ResultRoot
+    {
+        get => _resultRoot;
+        set
+        {
+            if (_resultRoot == value) return;
+            _resultRoot = value;
+            Refresh();
+        }
+    }
+
+
     private BarConfig _barConfig1 = null!;
     private BarConfig _barConfig2 = null!;
-    private readonly int MAX_LIMIT = int.MaxValue;
-
-    private int _eventId = 0;
-    private int _memberId = 14;
-    private int _skillId = 0;
     private string _member = "Japan";
 
-    protected override async Task OnInitializedAsync()
+
+    protected override void OnInitialized()
     {
-        _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member=14") ?? new Root();
-        _eventRoot = await _http.GetFromJsonAsync<EventRoot>("events") ?? new EventRoot();
-        _skillRoot = await _http.GetFromJsonAsync<SkillRoot>("base_skills?entity=1&l=en") ?? new SkillRoot();
-        _memberRoot = await _http.GetFromJsonAsync<MemberRoot>("members?l=en") ?? new MemberRoot();
+
         _barConfig1 = new BarConfig(true)
             {
                 Options = new BarOptions
@@ -156,34 +116,26 @@
                     }
                 }
             };
-        Refresh();
     }
 
-
-    private async Task SearchButtonOnClick()
-    {
-        if (_memberId != 0 && _eventId != 0 && _skillId != 0)
-            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}&event={_eventId}&skill_base_id={_skillId}") ?? new Root();
-        else if (_memberId != 0 && _eventId != 0)
-            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}&event={_eventId}") ?? new Root();
-        else if (_memberId != 0 && _skillId != 0)
-            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}&skill_base_id={_skillId}") ?? new Root();
-        else if (_eventId != 0 && _skillId != 0)
-            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&event={_eventId}&skill_base_id={_skillId}") ?? new Root();
-        else if (_memberId != 0)
-            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}") ?? new Root();
-        else if (_eventId != 0)
-            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&event={_eventId}") ?? new Root();
-        else if (_skillId != 0)
-            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&skill_base_id={_skillId}") ?? new Root();
-        _member = _memberRoot.Members.First(a => a.Id == _memberId).Name.Text;
-        Refresh();
-    }
+    //protected override void OnParametersSet()
+    //{
+    //    Refresh();
+    //}
 
     private void Refresh()
     {
+        GetMemberName();
         CreateBarChart1();
         CreateBarChart2();
+    }
+
+    private void GetMemberName()
+    {
+        if (ResultRoot is not null)
+        {
+            _member = ResultRoot.Results.First(a => a.Member is not null).Member.Name.Text;
+        }
     }
 
     private void CreateBarChart1()
@@ -195,51 +147,54 @@
         List<int> bronze = new List<int>();
         List<int> mfe = new List<int>();
         List<int> other = new List<int>();
-        _resultRoot.Results.GroupBy(a => a.Skill.Event.Code).Select(a => new
+        if (ResultRoot is not null)
         {
-            Event = a.Key,
-            Medals = a
-        }).ToList().ForEach(@event =>
-        {
-            _barConfig1.Data.Labels.Add(@event.Event);
-            gold.Add(@event.Medals.Count(a => a.Medal?.Code == "GOLD"));
-            silver.Add(@event.Medals.Count(a => a.Medal?.Code == "SILVER"));
-            bronze.Add(@event.Medals.Count(a => a.Medal?.Code == "BRONZE"));
-            mfe.Add(@event.Medals.Count(a => a.Medal?.Code == "MFE"));
-            other.Add(@event.Medals.Count(a => a.Medal is null || a.Medal.Code == null));
-        });
-        IDataset<int> goldData = new BarDataset<int>(gold, true)
+            ResultRoot.Results.GroupBy(a => a.Skill.Event.Code).Select(a => new
             {
-                Label = "Gold",
-                BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gold)
-            };
+                Event = a.Key,
+                Medals = a
+            }).ToList().ForEach(@event =>
+            {
+                _barConfig1.Data.Labels.Add(@event.Event);
+                gold.Add(@event.Medals.Count(a => a.Medal?.Code == "GOLD"));
+                silver.Add(@event.Medals.Count(a => a.Medal?.Code == "SILVER"));
+                bronze.Add(@event.Medals.Count(a => a.Medal?.Code == "BRONZE"));
+                mfe.Add(@event.Medals.Count(a => a.Medal?.Code == "MFE"));
+                other.Add(@event.Medals.Count(a => a.Medal is null || a.Medal.Code == null));
+            });
+            IDataset<int> goldData = new BarDataset<int>(gold, true)
+                {
+                    Label = "Gold",
+                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gold)
+                };
 
-        IDataset<int> silverData = new BarDataset<int>(silver, true)
-            {
-                Label = "Silver",
-                BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Silver)
-            };
+            IDataset<int> silverData = new BarDataset<int>(silver, true)
+                {
+                    Label = "Silver",
+                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Silver)
+                };
 
-        IDataset<int> bronzeData = new BarDataset<int>(bronze, true)
-            {
-                Label = "Bronze",
-                BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Brown)
-            };
-        IDataset<int> mfeData = new BarDataset<int>(mfe, true)
-            {
-                Label = "Medallion for Excellence",
-                BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Chocolate)
-            };
-        IDataset<int> otherData = new BarDataset<int>(other, true)
-            {
-                Label = "Other",
-                BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gray)
-            };
-        _barConfig1.Data.Datasets.Add(goldData);
-        _barConfig1.Data.Datasets.Add(silverData);
-        _barConfig1.Data.Datasets.Add(bronzeData);
-        _barConfig1.Data.Datasets.Add(mfeData);
-        _barConfig1.Data.Datasets.Add(otherData);
+            IDataset<int> bronzeData = new BarDataset<int>(bronze, true)
+                {
+                    Label = "Bronze",
+                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Brown)
+                };
+            IDataset<int> mfeData = new BarDataset<int>(mfe, true)
+                {
+                    Label = "Medallion for Excellence",
+                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Chocolate)
+                };
+            IDataset<int> otherData = new BarDataset<int>(other, true)
+                {
+                    Label = "Other",
+                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gray)
+                };
+            _barConfig1.Data.Datasets.Add(goldData);
+            _barConfig1.Data.Datasets.Add(silverData);
+            _barConfig1.Data.Datasets.Add(bronzeData);
+            _barConfig1.Data.Datasets.Add(mfeData);
+            _barConfig1.Data.Datasets.Add(otherData);
+        }
     }
 
     private void CreateBarChart2()
@@ -251,50 +206,53 @@
         List<int> bronze = new List<int>();
         List<int> mfe = new List<int>();
         List<int> other = new List<int>();
-        _resultRoot.Results.GroupBy(a => a.Skill.Name.Text).Select(a => new
+        if (ResultRoot is not null)
         {
-            Skill = a.Key,
-            Medals = a
-        }).ToList().ForEach(skill =>
-        {
-            _barConfig2.Data.Labels.Add(skill.Skill);
-            gold.Add(skill.Medals.Count(a => a.Medal?.Code == "GOLD"));
-            silver.Add(skill.Medals.Count(a => a.Medal?.Code == "SILVER"));
-            bronze.Add(skill.Medals.Count(a => a.Medal?.Code == "BRONZE"));
-            mfe.Add(skill.Medals.Count(a => a.Medal?.Code == "MFE"));
-            other.Add(skill.Medals.Count(a => a.Medal is null || a.Medal.Code == null));
-        });
-        IDataset<int> goldData = new BarDataset<int>(gold, true)
+            ResultRoot.Results.GroupBy(a => a.Skill.Name.Text).Select(a => new
             {
-                Label = "Gold",
-                BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gold)
-            };
+                Skill = a.Key,
+                Medals = a
+            }).ToList().ForEach(skill =>
+            {
+                _barConfig2.Data.Labels.Add(skill.Skill);
+                gold.Add(skill.Medals.Count(a => a.Medal?.Code == "GOLD"));
+                silver.Add(skill.Medals.Count(a => a.Medal?.Code == "SILVER"));
+                bronze.Add(skill.Medals.Count(a => a.Medal?.Code == "BRONZE"));
+                mfe.Add(skill.Medals.Count(a => a.Medal?.Code == "MFE"));
+                other.Add(skill.Medals.Count(a => a.Medal is null || a.Medal.Code == null));
+            });
+            IDataset<int> goldData = new BarDataset<int>(gold, true)
+                {
+                    Label = "Gold",
+                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gold)
+                };
 
-        IDataset<int> silverData = new BarDataset<int>(silver, true)
-            {
-                Label = "Silver",
-                BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Silver)
-            };
+            IDataset<int> silverData = new BarDataset<int>(silver, true)
+                {
+                    Label = "Silver",
+                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Silver)
+                };
 
-        IDataset<int> bronzeData = new BarDataset<int>(bronze, true)
-            {
-                Label = "Bronze",
-                BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Brown)
-            };
-        IDataset<int> mfeData = new BarDataset<int>(mfe, true)
-            {
-                Label = "Medallion for Excellence",
-                BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Chocolate)
-            };
-        IDataset<int> otherData = new BarDataset<int>(other, true)
-            {
-                Label = "Other",
-                BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gray)
-            };
-        _barConfig2.Data.Datasets.Add(goldData);
-        _barConfig2.Data.Datasets.Add(silverData);
-        _barConfig2.Data.Datasets.Add(bronzeData);
-        _barConfig2.Data.Datasets.Add(mfeData);
-        _barConfig2.Data.Datasets.Add(otherData);
+            IDataset<int> bronzeData = new BarDataset<int>(bronze, true)
+                {
+                    Label = "Bronze",
+                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Brown)
+                };
+            IDataset<int> mfeData = new BarDataset<int>(mfe, true)
+                {
+                    Label = "Medallion for Excellence",
+                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Chocolate)
+                };
+            IDataset<int> otherData = new BarDataset<int>(other, true)
+                {
+                    Label = "Other",
+                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gray)
+                };
+            _barConfig2.Data.Datasets.Add(goldData);
+            _barConfig2.Data.Datasets.Add(silverData);
+            _barConfig2.Data.Datasets.Add(bronzeData);
+            _barConfig2.Data.Datasets.Add(mfeData);
+            _barConfig2.Data.Datasets.Add(otherData);
+        }
     }
 }
