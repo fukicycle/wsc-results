@@ -31,16 +31,7 @@
 @code {
     private Root? _resultRoot;
     [Parameter]
-    public Root? ResultRoot
-    {
-        get => _resultRoot;
-        set
-        {
-            if (_resultRoot == value) return;
-            _resultRoot = value;
-            Refresh();
-        }
-    }
+    public Root? ResultRoot { get; set; }
 
 
     private BarConfig _barConfig1 = null!;
@@ -118,10 +109,12 @@
             };
     }
 
-    //protected override void OnParametersSet()
-    //{
-    //    Refresh();
-    //}
+    protected override void OnParametersSet()
+    {
+        if (_resultRoot == ResultRoot) return;
+        _resultRoot = ResultRoot;
+        Refresh();
+    }
 
     private void Refresh()
     {
@@ -134,7 +127,7 @@
     {
         if (ResultRoot is not null)
         {
-            _member = ResultRoot.Results.First(a => a.Member is not null).Member.Name.Text;
+            _member = ResultRoot.Results.FirstOrDefault(a => a.Member is not null)?.Member?.Name?.Text ?? "";
         }
     }
 
