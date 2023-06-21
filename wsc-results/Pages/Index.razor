@@ -5,7 +5,7 @@
 <div class="display-area">
     <div class="chart-filter">
         <div class="chart-filter-area">
-            <div class="filter-item">
+@*            <div class="filter-item">
                 <div>Competition:</div>
                 <select @bind="_eventId">
                     <option value="0">-</option>
@@ -17,7 +17,7 @@
                         }
                     }
                 </select>
-            </div>
+            </div>*@
             @if (_pageIndex == 0)
             {
                 <div class="filter-item">
@@ -68,7 +68,7 @@
     private readonly int MAX_LIMIT = int.MaxValue;
 
     private Root? _resultRoot = null;
-    private EventRoot _eventRoot = new EventRoot();
+    //private EventRoot _eventRoot = new EventRoot();
     private SkillRoot _skillRoot = new SkillRoot();
     private MemberRoot _memberRoot = new MemberRoot();
 
@@ -81,7 +81,7 @@
     protected override async Task OnInitializedAsync()
     {
         _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member=14") ?? new Root();
-        _eventRoot = await _http.GetFromJsonAsync<EventRoot>("events") ?? new EventRoot();
+        //_eventRoot = await _http.GetFromJsonAsync<EventRoot>("events") ?? new EventRoot();
         _skillRoot = await _http.GetFromJsonAsync<SkillRoot>("base_skills?entity=1&l=en") ?? new SkillRoot();
         _memberRoot = await _http.GetFromJsonAsync<MemberRoot>("members?l=en") ?? new MemberRoot();
     }
