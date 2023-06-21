@@ -18,31 +18,36 @@
                     }
                 </select>
             </div>
-            <div class="filter-item">
-                <div>Member:</div>
-                <select @bind="_memberId">
-                    @if (_memberRoot.Members is not null)
-                    {
-                        @foreach (var item in _memberRoot.Members)
+            @if (_pageIndex == 0)
+            {
+                <div class="filter-item">
+                    <div>Member:</div>
+                    <select @bind="_memberId">
+                        @if (_memberRoot.Members is not null)
                         {
-                            <option value="@item.Id">@item.Name.Text</option>
+                            @foreach (var item in _memberRoot.Members)
+                            {
+                                <option value="@item.Id">@item.Name.Text</option>
+                            }
                         }
-                    }
-                </select>
-            </div>
-            <div class="filter-item">
-                <div>Skill:</div>
-                <select @bind="_skillId">
-                    <option value="0">-</option>
-                    @if (_skillRoot.BaseSkills is not null)
-                    {
-                        @foreach (var item in _skillRoot.BaseSkills)
+                    </select>
+                </div>
+            }
+            else
+            {
+                <div class="filter-item">
+                    <div>Skill:</div>
+                    <select @bind="_skillId">
+                        @if (_skillRoot.BaseSkills is not null)
                         {
-                            <option value="@item.Id">@item.Name.Text</option>
+                            @foreach (var item in _skillRoot.BaseSkills)
+                            {
+                                <option value="@item.Id">@item.Name.Text</option>
+                            }
                         }
-                    }
-                </select>
-            </div>
+                    </select>
+                </div>
+            }
         </div>
         <button class="btn btn-primary w-100" @onclick="SearchButtonOnClick">Search</button>
     </div>
@@ -53,7 +58,7 @@
                 <ResultByCountryPage ResultRoot="@_resultRoot"></ResultByCountryPage>
                 break;
             case 1:
-                <ResultBySkillPage></ResultBySkillPage>
+                <ResultBySkillPage ResultRoot="@_resultRoot"></ResultBySkillPage>
                 break;
         }
     </div>
@@ -83,6 +88,15 @@
 
     private async Task SearchButtonOnClick()
     {
+        switch (_pageIndex)
+        {
+            case 0:
+                _skillId = 0;
+                break;
+            case 1:
+                _memberId = 0;
+                break;
+        }
         if (_memberId != 0 && _eventId != 0 && _skillId != 0)
             _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}&event={_eventId}&skill_base_id={_skillId}") ?? new Root();
         else if (_memberId != 0 && _eventId != 0)
@@ -97,6 +111,8 @@
             _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&event={_eventId}") ?? new Root();
         else if (_skillId != 0)
             _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&skill_base_id={_skillId}") ?? new Root();
+        else if (_memberId != 0)
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}") ?? new Root();
     }
 
     private void HeaderMenuButtonOnClick(int pageIndex)
