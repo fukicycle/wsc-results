@@ -90,19 +90,11 @@
                         {
                             new BarCategoryAxis
                             {
-                                Stacked = true,
                                 Ticks = new ChartJs.Blazor.Common.Axes.Ticks.CategoryTicks
                                 {
                                     Display = true,
                                     AutoSkip = false,
                                 }
-                            }
-                        },
-                        XAxes = new List<CartesianAxis>
-                        {
-                            new BarLinearCartesianAxis
-                            {
-                                Stacked = true
                             }
                         }
                     }
@@ -121,7 +113,7 @@
     {
         GetSkillName();
         CreateBarChart1();
-        //CreateBarChart2();
+        CreateBarChart2();
     }
 
     private void GetSkillName()
@@ -209,58 +201,24 @@
     {
         _barConfig2.Data.Datasets.Clear();
         _barConfig2.Data.Labels.Clear();
-        List<int> gold = new List<int>();
-        List<int> silver = new List<int>();
-        List<int> bronze = new List<int>();
-        List<int> mfe = new List<int>();
-        List<int> other = new List<int>();
         if (ResultRoot is not null)
         {
-            ResultRoot.Results.GroupBy(a => a.Skill.Name.Text).Select(a => new
+            Dictionary<string, int> points = new Dictionary<string, int>();
+            ResultRoot.Results.GroupBy(a => a.Member.Name.Text).OrderBy(a => a.Key).ToList().ForEach(country =>
             {
-                Skill = a.Key,
-                Medals = a
-            }).ToList().ForEach(skill =>
-            {
-                _barConfig2.Data.Labels.Add(skill.Skill);
-                gold.Add(skill.Medals.Count(a => a.Medal?.Code == "GOLD"));
-                silver.Add(skill.Medals.Count(a => a.Medal?.Code == "SILVER"));
-                bronze.Add(skill.Medals.Count(a => a.Medal?.Code == "BRONZE"));
-                mfe.Add(skill.Medals.Count(a => a.Medal?.Code == "MFE"));
-                other.Add(skill.Medals.Count(a => a.Medal is null || a.Medal.Code == null));
+                int result = country.Where(a => a.Medal?.Code == "GOLD").Select(a => 4).Sum()
+                + country.Where(a => a.Medal?.Code == "SILVER").Select(a => 3).Sum()
+                + country.Where(a => a.Medal?.Code == "BRONZE").Select(a => 2).Sum()
+                + country.Where(a => a.Medal?.Code == "MFE").Select(a => 1).Sum();
+                points.Add(country.Key, result);
             });
-            IDataset<int> goldData = new BarDataset<int>(gold, true)
+            IDataset<int> pointData = new BarDataset<int>(points.OrderByDescending(a => a.Value).Select(a => a.Value), true)
                 {
-                    Label = "Gold",
-                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gold)
+                    Label = "Points",
+                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.DeepSkyBlue)
                 };
-
-            IDataset<int> silverData = new BarDataset<int>(silver, true)
-                {
-                    Label = "Silver",
-                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Silver)
-                };
-
-            IDataset<int> bronzeData = new BarDataset<int>(bronze, true)
-                {
-                    Label = "Bronze",
-                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Brown)
-                };
-            IDataset<int> mfeData = new BarDataset<int>(mfe, true)
-                {
-                    Label = "Medallion for Excellence",
-                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Chocolate)
-                };
-            IDataset<int> otherData = new BarDataset<int>(other, true)
-                {
-                    Label = "Other",
-                    BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gray)
-                };
-            _barConfig2.Data.Datasets.Add(goldData);
-            _barConfig2.Data.Datasets.Add(silverData);
-            _barConfig2.Data.Datasets.Add(bronzeData);
-            _barConfig2.Data.Datasets.Add(mfeData);
-            _barConfig2.Data.Datasets.Add(otherData);
+                points.OrderByDescending(a => a.Value).ToList().ForEach(a => _barConfig2.Data.Labels.Add(a.Key));
+            _barConfig2.Data.Datasets.Add(pointData);
         }
     }
 }
