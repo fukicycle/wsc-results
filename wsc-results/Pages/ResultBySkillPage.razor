@@ -135,38 +135,55 @@
             List<int> bronze = new List<int>();
             List<int> mfe = new List<int>();
             List<int> other = new List<int>();
+            Dictionary<string, int> allPoints = new Dictionary<string, int>();
+            List<(string, int, int)> goldPoints = new List<(string, int, int)>();
+            List<(string, int, int)> silverPoints = new List<(string, int, int)>();
+            List<(string, int, int)> bronzePoints = new List<(string, int, int)>();
+            List<(string, int, int)> mfePoints = new List<(string, int, int)>();
+            List<(string, int, int)> otherPoints = new List<(string, int, int)>();
             ResultRoot.Results.GroupBy(a => a.Member.Name.Text).OrderBy(a => a.Key).ToList().ForEach(country =>
             {
-                _barConfig1.Data.Labels.Add(country.Key);
-                gold.Add(country.Count(a => a.Medal?.Code == "GOLD"));
-                silver.Add(country.Count(a => a.Medal?.Code == "SILVER"));
-                bronze.Add(country.Count(a => a.Medal?.Code == "BRONZE"));
-                mfe.Add(country.Count(a => a.Medal?.Code == "MFE"));
-                other.Add(country.Count(a => a.Medal is null || a.Medal.Code == null));
+                //_barConfig1.Data.Labels.Add(country.Key);
+                //gold.Add(country.Count(a => a.Medal?.Code == "GOLD"));
+                //silver.Add(country.Count(a => a.Medal?.Code == "SILVER"));
+                //bronze.Add(country.Count(a => a.Medal?.Code == "BRONZE"));
+                //mfe.Add(country.Count(a => a.Medal?.Code == "MFE"));
+                //other.Add(country.Count(a => a.Medal is null || a.Medal.Code == null));
+                int result = country.Where(a => a.Medal?.Code == "GOLD").Select(a => 4).Sum()
+                            + country.Where(a => a.Medal?.Code == "SILVER").Select(a => 3).Sum()
+                            + country.Where(a => a.Medal?.Code == "BRONZE").Select(a => 2).Sum()
+                            + country.Where(a => a.Medal?.Code == "MFE").Select(a => 1).Sum();
+                goldPoints.Add((country.Key, country.Count(a => a.Medal?.Code == "GOLD"), result));
+                silverPoints.Add((country.Key, country.Count(a => a.Medal?.Code == "SILVER"), result));
+                bronzePoints.Add((country.Key, country.Count(a => a.Medal?.Code == "BRONZE"), result));
+                mfePoints.Add((country.Key, country.Count(a => a.Medal?.Code == "MFE"), result));
+                otherPoints.Add((country.Key, country.Count(a => a.Medal?.Code is null || a.Medal is null), result));
+                allPoints.Add(country.Key, result);
             });
-            IDataset<int> goldData = new BarDataset<int>(gold, true)
+            allPoints.OrderByDescending(a => a.Value).Select(a => a.Key).ToList().ForEach(a => _barConfig1.Data.Labels.Add(a));
+            IDataset<int> goldData = new BarDataset<int>(goldPoints.OrderByDescending(a => a.Item3).Select(a => a.Item2), true)
                 {
                     Label = "Gold",
                     BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gold)
                 };
 
-            IDataset<int> silverData = new BarDataset<int>(silver, true)
+            IDataset<int> silverData = new BarDataset<int>(silverPoints.OrderByDescending(a => a.Item3).Select(a => a.Item2), true)
                 {
                     Label = "Silver",
                     BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Silver)
                 };
 
-            IDataset<int> bronzeData = new BarDataset<int>(bronze, true)
+            IDataset<int> bronzeData = new BarDataset<int>(bronzePoints.OrderByDescending(a => a.Item3).Select(a => a.Item2), true)
                 {
                     Label = "Bronze",
                     BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Brown)
                 };
-            IDataset<int> mfeData = new BarDataset<int>(mfe, true)
+            IDataset<int> mfeData = new BarDataset<int>(mfePoints.OrderByDescending(a => a.Item3).Select(a => a.Item2), true)
                 {
                     Label = "Medallion for Excellence",
                     BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Chocolate)
                 };
-            IDataset<int> otherData = new BarDataset<int>(other, true)
+            IDataset<int> otherData = new BarDataset<int>(otherPoints.OrderByDescending(a => a.Item3).Select(a => a.Item2), true)
                 {
                     Label = "Other",
                     BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Gray)
@@ -217,7 +234,7 @@
                     Label = "Points",
                     BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.DeepSkyBlue)
                 };
-                points.OrderByDescending(a => a.Value).ToList().ForEach(a => _barConfig2.Data.Labels.Add(a.Key));
+            points.OrderByDescending(a => a.Value).ToList().ForEach(a => _barConfig2.Data.Labels.Add(a.Key));
             _barConfig2.Data.Datasets.Add(pointData);
         }
     }
