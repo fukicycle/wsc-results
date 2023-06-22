@@ -7,6 +7,6 @@ version: 2
 updates:
   # Client check
   - package-ecosystem: "nuget" # See documentation for possible values
-    directory: "/wsc-result" # Location of package manifests
+    directory: "/wsc-results" # Location of package manifests
     schedule:
       interval: "weekly"
