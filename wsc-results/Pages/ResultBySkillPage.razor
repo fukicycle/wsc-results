@@ -42,7 +42,7 @@
             {
                 Options = new BarOptions
                 {
-                    AspectRatio = 1,
+                    AspectRatio = 0.5,
                     Responsive = true,
                     Tooltips = new Tooltips
                     {
@@ -55,7 +55,12 @@
                     {
                         new BarCategoryAxis
                         {
-                            Stacked = true
+                            Stacked = true,
+                            Ticks = new ChartJs.Blazor.Common.Axes.Ticks.CategoryTicks
+                                {
+                                    Display = true,
+                                    AutoSkip = false,
+                                }
                         }
                     },
                         XAxes = new List<CartesianAxis>
