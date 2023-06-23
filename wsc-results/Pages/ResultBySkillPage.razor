@@ -14,6 +14,12 @@
                     <Chart Config="_barConfig2"></Chart>
                 </div>
             </div>
+            <div class="chart-content w-50">
+                <div>Medal points per country</div>
+                <div class="chart">
+                    <Chart Config="_lineConfig"></Chart>
+                </div>
+            </div>
         </div>
     }
     else
@@ -34,6 +40,7 @@
 
     private BarConfig _barConfig1 = null!;
     private BarConfig _barConfig2 = null!;
+    private LineConfig _lineConfig = null!;
 
     protected override void OnInitialized()
     {
@@ -99,6 +106,14 @@
                     }
                 }
             };
+        _lineConfig = new LineConfig()
+            {
+                Options = new LineOptions
+                {
+                    AspectRatio = 1,
+                    Responsive = true
+                }
+            };
     }
 
     protected override void OnParametersSet()
@@ -110,8 +125,10 @@
 
     private void Refresh()
     {
-        CreateBarChart1();
-        CreateBarChart2();
+        Task.Run(() => CreateBarChart1());
+        Task.Run(() => CreateBarChart2());
+        Task.Run(() => CreateLineChart());
+
     }
 
     private void CreateBarChart1()
@@ -202,6 +219,44 @@
                 };
             points.OrderByDescending(a => a.Value).ToList().ForEach(a => _barConfig2.Data.Labels.Add(a.Key));
             _barConfig2.Data.Datasets.Add(pointData);
+        }
+    }
+
+    private void CreateLineChart()
+    {
+        _lineConfig.Data.Datasets.Clear();
+        _lineConfig.Data.Labels.Clear();
+        if (ResultRoot is not null)
+        {
+            ResultRoot.Results.GroupBy(a => new { a.Skill.Event.Name, a.Skill.Event.EndDate }).OrderByDescending(a => a.Key.EndDate).ToList().ForEach(competition =>
+            {
+                _lineConfig.Data.Labels.Add(competition.Key.Name);
+            });
+            Dictionary<string, List<int>> datas = new Dictionary<string, List<int>>();
+            ResultRoot.Results.GroupBy(a => a.Member.Name.Text).ToList().ForEach(country =>
+            {
+                List<int> data = new List<int>();
+                country.GroupBy(a => new { a.Skill.Event.Name, a.Skill.Event.EndDate }).OrderByDescending(a => a.Key.EndDate).ToList().ForEach(competition =>
+                {
+                    int result = competition.Where(a => a.Medal?.Code == "GOLD").Select(a => 4).Sum()
+                    + competition.Where(a => a.Medal?.Code == "SILVER").Select(a => 3).Sum()
+                    + competition.Where(a => a.Medal?.Code == "BRONZE").Select(a => 2).Sum()
+                    + competition.Where(a => a.Medal?.Code == "MFE").Select(a => 1).Sum();
+                    data.Add(result);
+                });
+                datas.Add(country.Key, data);
+            });
+
+            datas.OrderByDescending(a => a.Value.Sum()).ToList().ForEach(a =>
+            {
+                IDataset<int> dataset = new LineDataset<int>(a.Value)
+                    {
+                        Label = a.Key,
+                        BorderColor = ColorUtil.RandomColorString(),
+                        Fill = FillingMode.Disabled
+                    };
+                _lineConfig.Data.Datasets.Add(dataset);
+            });
         }
     }
 }
