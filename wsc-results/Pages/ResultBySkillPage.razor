@@ -242,8 +242,9 @@
                 });
                 datas.Add(country.Key, data);
             });
-
-            datas.Where(a => a.Value.Sum() >= 50).OrderByDescending(a => a.Value.Sum()).ToList().ForEach(a =>
+            int limit = 50;
+            if(ResultRoot.Results.GroupBy(a => a.Skill.BaseId).Count() == 1) limit = 1;
+            datas.Where(a => a.Value.Sum() >= limit).OrderByDescending(a => a.Value.Sum()).ToList().ForEach(a =>
             {
                 IDataset<int> dataset = new LineDataset<int>(a.Value)
                     {
