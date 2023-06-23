@@ -38,6 +38,7 @@
                 <div class="filter-item">
                     <div>Skill:</div>
                     <select @bind="_skillId">
+                        <option value="0">All</option>
                         @if (_skillRoot.BaseSkills is not null)
                         {
                             @foreach (var item in _skillRoot.BaseSkills)
@@ -113,6 +114,8 @@
             _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&skill_base_id={_skillId}") ?? new Root();
         else if (_memberId != 0)
             _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}&sort=event_desc&member={_memberId}") ?? new Root();
+        else
+            _resultRoot = await _http.GetFromJsonAsync<Root>($"?offset=0&limit={MAX_LIMIT}") ?? new Root();
     }
 
     private async Task HeaderMenuButtonOnClick(int pageIndex)

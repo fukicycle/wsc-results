@@ -3,13 +3,13 @@
     {
         <div class="chart-area">
             <div class="chart-content">
-                <div>Graph by country in @_skill</div>
+                <div>Medal points ranking graph</div>
                 <div class="chart">
                     <Chart Config="_barConfig1"></Chart>
                 </div>
             </div>
             <div class="chart-content">
-                <div>Graph by skill in @_skill</div>
+                <div>Medal points ranking graph (sum)</div>
                 <div class="chart">
                     <Chart Config="_barConfig2"></Chart>
                 </div>
@@ -34,7 +34,6 @@
 
     private BarConfig _barConfig1 = null!;
     private BarConfig _barConfig2 = null!;
-    private string _skill = "";
 
     protected override void OnInitialized()
     {
@@ -42,7 +41,7 @@
             {
                 Options = new BarOptions
                 {
-                    AspectRatio = 0.5,
+                    AspectRatio = 0.4,
                     Responsive = true,
                     Tooltips = new Tooltips
                     {
@@ -77,7 +76,7 @@
             {
                 Options = new BarOptions
                 {
-                    AspectRatio = 0.5,
+                    AspectRatio = 0.4,
                     Responsive = true,
                     Tooltips = new Tooltips
                     {
@@ -111,17 +110,8 @@
 
     private void Refresh()
     {
-        GetSkillName();
         CreateBarChart1();
         CreateBarChart2();
-    }
-
-    private void GetSkillName()
-    {
-        if (ResultRoot is not null)
-        {
-            _skill = ResultRoot.Results.FirstOrDefault(a => a.Skill is not null)?.Skill?.Name?.Text ?? "";
-        }
     }
 
     private void CreateBarChart1()
@@ -143,12 +133,6 @@
             List<(string, int, int)> otherPoints = new List<(string, int, int)>();
             ResultRoot.Results.GroupBy(a => a.Member.Name.Text).OrderBy(a => a.Key).ToList().ForEach(country =>
             {
-                //_barConfig1.Data.Labels.Add(country.Key);
-                //gold.Add(country.Count(a => a.Medal?.Code == "GOLD"));
-                //silver.Add(country.Count(a => a.Medal?.Code == "SILVER"));
-                //bronze.Add(country.Count(a => a.Medal?.Code == "BRONZE"));
-                //mfe.Add(country.Count(a => a.Medal?.Code == "MFE"));
-                //other.Add(country.Count(a => a.Medal is null || a.Medal.Code == null));
                 int result = country.Where(a => a.Medal?.Code == "GOLD").Select(a => 4).Sum()
                             + country.Where(a => a.Medal?.Code == "SILVER").Select(a => 3).Sum()
                             + country.Where(a => a.Medal?.Code == "BRONZE").Select(a => 2).Sum()
@@ -193,24 +177,6 @@
             _barConfig1.Data.Datasets.Add(bronzeData);
             _barConfig1.Data.Datasets.Add(mfeData);
             _barConfig1.Data.Datasets.Add(otherData);
-        }
-    }
-
-    private System.Drawing.Color GetColor(string code)
-    {
-        switch (code.ToUpper())
-        {
-            case "GOLD":
-                return System.Drawing.Color.Gold;
-            case "SILVER":
-                return System.Drawing.Color.Silver;
-            case "BRONZE":
-                return System.Drawing.Color.Brown;
-            case "MFE":
-                return System.Drawing.Color.Chocolate;
-            default:
-                return System.Drawing.Color.Gray;
-
         }
     }
 
