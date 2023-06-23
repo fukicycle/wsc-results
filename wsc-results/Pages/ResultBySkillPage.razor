@@ -1,20 +1,20 @@
 ﻿<div class="main-area">
     <div class="chart-area">
-        <div class="chart-content">
+        <div class="chart-content w-4">
             <div>Medal points ranking graph</div>
             <div class="chart">
                 <Chart Config="_barConfig1"></Chart>
             </div>
         </div>
-        <div class="chart-content">
+        <div class="chart-content w-4">
             <div>Medal points ranking graph (sum)</div>
             <div class="chart">
                 <Chart Config="_barConfig2"></Chart>
             </div>
         </div>
-        <div class="chart-content w-50">
+        <div class="chart-content w-2">
             <div>Medal points per country</div>
-            <div class="chart">
+            <div class="chart" style="min-width:600px;">
                 <Chart Config="_lineConfig"></Chart>
             </div>
         </div>
@@ -243,13 +243,14 @@
                 datas.Add(country.Key, data);
             });
 
-            datas.OrderByDescending(a => a.Value.Sum()).ToList().ForEach(a =>
+            datas.Where(a => a.Value.Sum() >= 50).OrderByDescending(a => a.Value.Sum()).ToList().ForEach(a =>
             {
                 IDataset<int> dataset = new LineDataset<int>(a.Value)
                     {
                         Label = a.Key,
                         BorderColor = ColorUtil.RandomColorString(),
-                        Fill = FillingMode.Disabled
+                        Fill = FillingMode.Disabled,
+                        LineTension = 0
                     };
                 _lineConfig.Data.Datasets.Add(dataset);
             });
